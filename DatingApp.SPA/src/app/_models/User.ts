@@ -1,4 +1,4 @@
-import { Photo } from 'src/app/_models/Photo';
+import { Photo } from './Photo';
 
 export interface User {
     id: number;

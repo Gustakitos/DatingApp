@@ -16,18 +16,22 @@ export class UserService {
 
 constructor(private authHttp: AuthHttp) { }
 
-getUsers(): Observable<User []> {
-  return this.authHttp.get(this.baseUrl + 'users')
-    .map(response => <User[]>response.json())
-    .catch(this.handleError);
-}
+  getUsers(): Observable<User []> {
+    return this.authHttp.get(this.baseUrl + 'users')
+      .map(response => <User[]>response.json())
+      .catch(this.handleError);
+  }
 
-getUser(id): Observable<User> {
-  return this.authHttp
-    .get(this.baseUrl + 'users/' + id)
-    .map(response => <User>response.json())
-    .catch(this.handleError);
-}
+  getUser(id): Observable<User> {
+    return this.authHttp
+      .get(this.baseUrl + 'users/' + id)
+      .map(response => <User>response.json())
+      .catch(this.handleError);
+  }
+
+  updateUser(id: Number, user: User) {
+    return this.authHttp.put(this.baseUrl + 'users/' + id, user);
+  }
 
 private handleError(error: any) {
   const applicationError = error.headers.get('Application-Error');
