@@ -33,7 +33,7 @@ namespace DatingApp.API.Data
         }
 
         public User VerifyUsername(string username){
-            var user = _context.Users.Where(x=>x.Username == username).FirstOrDefault();
+            var user = _context.Users.Include(p=>p.Photos).Where(x=>x.Username == username).FirstOrDefault();
             return user;
         }
 

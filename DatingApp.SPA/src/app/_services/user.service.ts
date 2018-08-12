@@ -33,6 +33,14 @@ constructor(private authHttp: AuthHttp) { }
     return this.authHttp.put(this.baseUrl + 'users/' + id, user);
   }
 
+  setMainPhoto(userId: number, id: number) {
+    return this.authHttp.post(this.baseUrl + 'users/' + userId + '/photos/' + id + '/setMain', {} );
+  }
+
+  deletePhoto(userId: number, id: number) {
+    return this.authHttp.delete(this.baseUrl + 'users/' + userId + '/photos/' + id);
+  }
+
 private handleError(error: any) {
   const applicationError = error.headers.get('Application-Error');
 
