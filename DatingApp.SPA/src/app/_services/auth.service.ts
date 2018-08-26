@@ -6,6 +6,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 import { User } from '../_models/User';
+
 @Injectable()
 export class AuthService {
   baseUrl = 'http://localhost:5000/api/auth/';
@@ -38,8 +39,8 @@ login(model: any) {
       }).catch(this.handleError);
 }
 
-register(model: any) {
-  return this.http.post(this.baseUrl + 'register', model, this.requestOptions()).catch(this.handleError);
+register(user: User) {
+  return this.http.post(this.baseUrl + 'register', user, this.requestOptions()).catch(this.handleError);
 }
 
 loggedin() {
