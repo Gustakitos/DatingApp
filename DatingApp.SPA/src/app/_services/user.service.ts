@@ -1,4 +1,4 @@
-import { Http, RequestOptions, Headers} from '@angular/http';
+import { RequestOptions, Headers} from '@angular/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
@@ -7,6 +7,18 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 import { User } from '../_models/User';
 import { AuthHttp } from 'angular2-jwt';
+import { PaginatedResult } from '../_models/pagination';
+import { HttpParams, HttpClient, HttpHeaders } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { HttpClientModule } from '@angular/common/http';
+import { Http, HttpModule } from '@angular/http';
+import { forEach } from '@angular/router/src/utils/collection';
+
+const httpOptions = {
+  headers: new HttpHeaders({
+    'Authorization': 'Bearer ' + localStorage.getItem('token')
+  })
+};
 
 @Injectable({
   providedIn: 'root'
@@ -14,31 +26,54 @@ import { AuthHttp } from 'angular2-jwt';
 export class UserService {
   baseUrl = environment.apiUrl;
 
-constructor(private authHttp: AuthHttp) { }
+constructor(private http: HttpClient) { }
 
-  getUsers(): Observable<User []> {
-    return this.authHttp.get(this.baseUrl + 'users')
-      .map(response => <User[]>response.json())
-      .catch(this.handleError);
+/*
+getUsers(): Observable<User[]> {
+  return this.http.get<User[]>(this.baseUrl + 'users', httpOptions);
+}
+
+*/
+
+  getUsers(page?, itemsPerPage?): Observable<PaginatedResult<User[]>> {
+    const paginatedResult: PaginatedResult<User[]> = new PaginatedResult<User[]>();
+
+    let params = new HttpParams();
+
+    if (page != null && itemsPerPage != null) {
+      params = params.append('pageNumber', page);
+      params = params.append('pageSize', itemsPerPage);
+    }
+
+    const res = this.http.get<User[]>(this.baseUrl + 'users', { observe: 'response', params })
+      .pipe(
+        map(response => {
+          paginatedResult.result = response.body;
+
+          if (response.headers.get('Unknown') != null ) {
+            paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'));
+          }
+          return paginatedResult;
+        })
+      );
+
+      return res;
   }
 
   getUser(id): Observable<User> {
-    return this.authHttp
-      .get(this.baseUrl + 'users/' + id)
-      .map(response => <User>response.json())
-      .catch(this.handleError);
+    return this.http.get<User>(this.baseUrl + 'users/' + id);
   }
 
   updateUser(id: Number, user: User) {
-    return this.authHttp.put(this.baseUrl + 'users/' + id, user);
+    return this.http.put(this.baseUrl + 'users/' + id, user);
   }
 
   setMainPhoto(userId: number, id: number) {
-    return this.authHttp.post(this.baseUrl + 'users/' + userId + '/photos/' + id + '/setMain', {} );
+    return this.http.post(this.baseUrl + 'users/' + userId + '/photos/' + id + '/setMain', {} );
   }
 
   deletePhoto(userId: number, id: number) {
-    return this.authHttp.delete(this.baseUrl + 'users/' + userId + '/photos/' + id);
+    return this.http.delete(this.baseUrl + 'users/' + userId + '/photos/' + id);
   }
 
 private handleError(error: any) {
