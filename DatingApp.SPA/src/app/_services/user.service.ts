@@ -1,24 +1,10 @@
-import { RequestOptions, Headers} from '@angular/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/throw';
-import { User } from '../_models/User';
-import { AuthHttp } from 'angular2-jwt';
+import { User } from '../_models/user';
 import { PaginatedResult } from '../_models/pagination';
-import { HttpParams, HttpClient, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
-import { HttpClientModule } from '@angular/common/http';
-import { Http, HttpModule } from '@angular/http';
-import { forEach } from '@angular/router/src/utils/collection';
-
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Authorization': 'Bearer ' + localStorage.getItem('token')
-  })
-};
 
 @Injectable({
   providedIn: 'root'
@@ -26,16 +12,9 @@ const httpOptions = {
 export class UserService {
   baseUrl = environment.apiUrl;
 
-constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-/*
-getUsers(): Observable<User[]> {
-  return this.http.get<User[]>(this.baseUrl + 'users', httpOptions);
-}
-
-*/
-
-  getUsers(page?, itemsPerPage?): Observable<PaginatedResult<User[]>> {
+  getUsers(page?, itemsPerPage?, userParams?): Observable<PaginatedResult<User[]>> {
     const paginatedResult: PaginatedResult<User[]> = new PaginatedResult<User[]>();
 
     let params = new HttpParams();
@@ -45,58 +24,38 @@ getUsers(): Observable<User[]> {
       params = params.append('pageSize', itemsPerPage);
     }
 
-    const res = this.http.get<User[]>(this.baseUrl + 'users', { observe: 'response', params })
+    if (userParams != null) {
+      params = params.append('minAge', userParams.minAge);
+      params = params.append('maxAge', userParams.maxAge);
+      params = params.append('gender', userParams.gender);
+      params = params.append('orderBy', userParams.orderBy);
+    }
+
+    return this.http.get<User[]>(this.baseUrl + 'users', { observe: 'response', params})
       .pipe(
         map(response => {
           paginatedResult.result = response.body;
-
-          if (response.headers.get('Unknown') != null ) {
-            paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'));
+          if (response.headers.get('Pagination') != null) {
+            paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'))
           }
           return paginatedResult;
         })
       );
-
-      return res;
   }
 
   getUser(id): Observable<User> {
     return this.http.get<User>(this.baseUrl + 'users/' + id);
   }
 
-  updateUser(id: Number, user: User) {
+  updateUser(id: number, user: User) {
     return this.http.put(this.baseUrl + 'users/' + id, user);
   }
 
   setMainPhoto(userId: number, id: number) {
-    return this.http.post(this.baseUrl + 'users/' + userId + '/photos/' + id + '/setMain', {} );
+    return this.http.post(this.baseUrl + 'users/' + userId + '/photos/' + id + '/setMain', {});
   }
 
   deletePhoto(userId: number, id: number) {
     return this.http.delete(this.baseUrl + 'users/' + userId + '/photos/' + id);
   }
-
-private handleError(error: any) {
-  const applicationError = error.headers.get('Application-Error');
-
-  if (applicationError) {
-    return Observable.throw(applicationError);
-  }
-
-  const serverError = error.json();
-  let modelStateErrors = '';
-  if (serverError) {
-    for (const key in serverError) {
-      if (serverError[key]) {
-      modelStateErrors += serverError[key] + '\n';
-    }
-    }
-  }
-
-  return Observable.throw(
-    modelStateErrors || 'Server error'
-  );
-
-}
-
 }
