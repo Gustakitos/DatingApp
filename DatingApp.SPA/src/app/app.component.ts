@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './_services/auth.service';
-import { JwtHelper } from 'angular2-jwt';
-import { User } from './_models/User';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { User } from './_models/user';
 
 @Component({
   selector: 'app-root',
@@ -9,12 +9,9 @@ import { User } from './_models/User';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'app';
-  jwtHelper: JwtHelper = new JwtHelper();
+  jwtHelper = new JwtHelperService();
 
-  constructor(private authService: AuthService) {
-
-  }
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
     const token = localStorage.getItem('token');
@@ -22,7 +19,6 @@ export class AppComponent implements OnInit {
     if (token) {
       this.authService.decodedToken = this.jwtHelper.decodeToken(token);
     }
-
     if (user) {
       this.authService.currentUser = user;
       this.authService.changeMemberPhoto(user.photoUrl);
