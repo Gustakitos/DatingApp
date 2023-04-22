@@ -1,5 +1,6 @@
 using System.Text;
 using API.Data;
+using API.Data.Mutations;
 using API.Extensions;
 using API.Interfaces;
 using API.Services;
@@ -14,6 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddGraphQLServer()
+  .AddQueryType<Query>()
+  .AddMutationType<Mutation>()
+  .AddProjections()
+  .AddFiltering()
+  .AddSorting();
+
 
 var app = builder.Build();
 
@@ -32,5 +40,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGraphQL("/graphql");
 
 app.Run();
