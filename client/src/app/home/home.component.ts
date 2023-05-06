@@ -1,19 +1,30 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { Apollo } from 'apollo-angular';
+import { Observable, map, of } from 'rxjs';
+import { GET_USERS } from '../gql/users';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
   registerMode = false;
   users: any;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private apollo: Apollo) {}
+
+  members$: Observable<any> = of([]);
 
   ngOnInit(): void {
-    this.getUsers();
+    this.getMembersGql();
+  }
+
+  getMembersGql() {
+    this.members$ = this.apollo
+      .watchQuery<{ members: any }>({ query: GET_USERS })
+      .valueChanges.pipe(map((result) => result.data.members));
   }
 
   getUsers() {
