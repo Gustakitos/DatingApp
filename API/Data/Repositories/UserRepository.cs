@@ -16,7 +16,7 @@ namespace API.Data.Repositories
     private readonly DataContext _context;
     public IMapper _mapper;
 
-    public UserRepository(DataContext context, IMapper mapper)
+    public UserRepository([Service] DataContext context, [Service] IMapper mapper)
     {
       _mapper = mapper;
       _context = context;
@@ -36,6 +36,14 @@ namespace API.Data.Repositories
         .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
         .ToListAsync();
     }
+
+    public IEnumerable<MemberDto> GetMembers()
+    {
+      return _context.Users
+        .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
+        .ToList();
+    }
+
 
     public async Task<AppUser> GetUserByIdAsync(int id)
     {

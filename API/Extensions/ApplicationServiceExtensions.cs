@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Mutations;
 using API.Data.Repositories;
 using API.Interfaces;
 using API.Services;
@@ -23,6 +24,14 @@ namespace API.Extensions
       services.AddEndpointsApiExplorer();
       services.AddSwaggerGen();
       services.AddCors();
+
+      services.AddGraphQLServer()
+        .AddQueryType<Query>()
+        .AddMutationType<Mutation>()
+        .AddProjections()
+        .AddFiltering()
+        .AddSorting();
+
       services.AddScoped<ITokenService, TokenService>();
 
       services.AddScoped<IUserRepository, UserRepository>();

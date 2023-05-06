@@ -16,13 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
-builder.Services.AddGraphQLServer()
-  .AddQueryType<Query>()
-  .AddMutationType<Mutation>()
-  .AddProjections()
-  .AddFiltering()
-  .AddSorting();
-
 
 var app = builder.Build();
 
@@ -37,14 +30,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.MapGraphQL("/graphql");
+
+app.UseCors(builder =>
+  builder.AllowAnyHeader()
+  .AllowAnyMethod()
+  .WithOrigins("http://localhost:4200"));
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
