@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Container, Nav, NavDropdown, Navbar } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { LOGIN } from "../gql/navQueries";
+import { NavLink } from "react-router-dom";
 
 interface AuthenticateFormData {
   username: string;
@@ -83,23 +84,35 @@ export function NavBar() {
         <Navbar.Brand href="/">Dating App</Navbar.Brand>
         {loggedIn ? (
           <>
-            <ul className="navbar-nav me-auto mb-2 mb-md-0">
-              <li className="nav-item">
-                <a className="nav-link" aria-current="page" href="#">
-                  Matches
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Lists
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Messages
-                </a>
-              </li>
-            </ul>
+            <Nav
+              className="me-auto my-2 my-lg-0"
+              style={{ maxHeight: "100px" }}
+            >
+              <NavLink
+                to={"/members"}
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+              >
+                Matches
+              </NavLink>
+              <NavLink
+                to="/lists"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+              >
+                Lists
+              </NavLink>
+              <NavLink
+                to="/messages"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+              >
+                Messages
+              </NavLink>
+            </Nav>
             <Navbar.Collapse
               style={{
                 display: "flex",
