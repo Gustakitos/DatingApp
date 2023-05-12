@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map, of } from 'rxjs';
@@ -8,15 +7,15 @@ import { GET_USERS } from '../gql/users';
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
   registerMode = false;
   users: any;
 
-  constructor(private http: HttpClient, private apollo: Apollo) {}
+  constructor() {}
 
-  members$: Observable<any> = of([]);
-
+  ngOnInit(): void {}
   ngOnInit(): void {
     this.getMembersGql();
   }
