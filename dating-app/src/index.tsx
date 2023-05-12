@@ -12,17 +12,30 @@ import {
   createHttpLink,
 } from "@apollo/client";
 import { NavBar } from "./components/nav/nav";
+import { setContext } from '@apollo/client/link/context';
+import { getHttpOptions } from "./components/utils/utils";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+
+const authLink = setContext((_, { headers }) => {
+  const options = getHttpOptions();
+
+  return {
+    headers: {
+      ...headers,
+      authorization: options ? `Bearer ${options.token}` : '',
+    },
+  };
+});
 
 const link = createHttpLink({
   uri: "http://localhost:5251/graphql",
 });
 
 const client = new ApolloClient({
-  link,
+  link: authLink.concat(link),
   credentials: "include",
   cache: new InMemoryCache(),
 });

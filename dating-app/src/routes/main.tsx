@@ -7,6 +7,7 @@ import Lists from "../components/Lists/Lists";
 import Messages from "../components/Messages/Messages";
 import { NESTED_ROUTES, ROUTES } from "./constants";
 import ProtectedRoute from "./ProtectedRoute";
+import NotFound from "../components/Errors/NotFound";
 
 interface RouteDetails {
   path: string;
@@ -17,7 +18,7 @@ export default function Main() {
   const protectedRoutes: RouteDetails[] = [
     { path: ROUTES.MEMBERLIST, component: <MemberList /> },
     {
-      path: `${ROUTES.MEMBERDETAIL}/${NESTED_ROUTES.ID}`,
+      path: `${ROUTES.MEMBERDETAIL}${NESTED_ROUTES.ID}`,
       component: <MemberDetail />,
     },
     { path: ROUTES.LISTS, component: <Lists /> },
@@ -31,15 +32,17 @@ export default function Main() {
 
   return (
     <Routes>
-      {protectedRoutes.map((route) => (
+      {protectedRoutes.map((route, i) => (
         <Route
+          key={i}
           path={route.path}
           element={<ProtectedRoute>{route.component}</ProtectedRoute>}
         />
       ))}
-      {regularRoutes.map((route) => (
-        <Route path={route.path} element={route.component} />
+      {regularRoutes.map((route, i) => (
+        <Route key={i} path={route.path} element={route.component} />
       ))}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

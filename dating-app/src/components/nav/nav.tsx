@@ -2,7 +2,7 @@ import { useMutation } from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
 import { Container, Nav, NavDropdown, Navbar } from "react-bootstrap";
 import { useForm } from "react-hook-form";
-import { LOGIN } from "../gql/navQueries";
+import { LOGIN } from "../gql/RegisterQueries";
 import { NavLink } from "react-router-dom";
 
 interface AuthenticateFormData {

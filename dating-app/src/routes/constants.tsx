@@ -4,7 +4,7 @@ export const ROUTES = {
   MEMBERLIST: '/members',
   MEMBERDETAIL: '/members/',
   LISTS: '/lists',
-  MESSAGES: '/messages'
+  MESSAGES: '/messages',
 }
 
 export const NESTED_ROUTES = {

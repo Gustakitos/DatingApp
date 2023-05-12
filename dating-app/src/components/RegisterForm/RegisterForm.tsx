@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { Button, Container } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { REGISTER_MUTATION } from "../gql/navQueries";
+import { REGISTER_MUTATION } from "../gql/RegisterQueries";
 import { useMutation } from "@apollo/client";
 
 interface RegisterFormData {
