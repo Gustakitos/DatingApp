@@ -2,44 +2,38 @@ import { useCallback, useEffect, useState } from "react";
 import { GET_MEMBERS_QUERY } from "./gql/MemberQueries";
 import { Member } from "../../models/Member";
 import { useQuery } from "@apollo/client";
+import MemberCard from "./MemberCard";
 
 export default function MemberList() {
-  const query = useQuery<{members: Member[]}>(GET_MEMBERS_QUERY);
+  const query = useQuery<{ members: Member[] }>(GET_MEMBERS_QUERY);
 
   const [members, setMembers] = useState<Member[]>();
   const [showLoading, setShowLoading] = useState(true);
 
   const getMembers = useCallback(() => {
-    const { data, loading, error } = query;
+    const { data, loading } = query;
 
     setShowLoading(loading);
     if (data) {
       setMembers(data?.members);
     }
-    console.log("data: ", data);
-    console.log("loading: ", loading);
-    console.log("error: ", error);
   }, [query]);
 
   useEffect(() => {
     getMembers();
   }, [getMembers]);
 
-  const loopUsers = () => {
-    return members?.map((member => {
-      return (
-        <p key={member.id}>{member.userName}</p>
-      )
-    }))
+  const renderUserCard = () => {
+    return members?.map((member, i) => {
+      return <MemberCard key={i} member={member} />;
+    });
   };
 
-  if (showLoading) return (<p>Loading...</p>);
+  if (showLoading) return <p>Loading...</p>;
 
   return (
     <div className="row">
-      <div className="col-2">
-        {loopUsers()}
-      </div>
+      <div className="text-center">{renderUserCard()}</div>
     </div>
   );
 }
