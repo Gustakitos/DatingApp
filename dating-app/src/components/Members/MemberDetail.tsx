@@ -4,6 +4,7 @@ import { Member } from "../../models/Member";
 import { GET_MEMBER } from "./gql/MemberQueries";
 import { useQuery } from "@apollo/client";
 import { Tab, Tabs } from "react-bootstrap";
+import PhotoGallery from "./components/PhotoGallery/PhotoGallery";
 
 interface GetMemberData {
   member: Member;
@@ -43,10 +44,7 @@ export default function MemberDetail() {
   if (showLoading) return <div>Loading....</div>;
 
   const renderTabs = (member: Member) => {
-    /**
-     * Photos
-     * { display: inline-block; margin-bottom: 20px; }
-     */
+
 
     return (
       <Tabs defaultActiveKey="about" className="mb-3">
@@ -61,7 +59,7 @@ export default function MemberDetail() {
           <p>{member.interests}</p>
         </Tab>
         <Tab eventKey="photo" title="Photos">
-          Tab content for Photos
+          <PhotoGallery photos={member.photos} />
         </Tab>
         <Tab eventKey="messages" title="Messages">
           Tab content for Messages

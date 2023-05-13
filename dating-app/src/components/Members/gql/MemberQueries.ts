@@ -34,6 +34,11 @@ export const GET_MEMBER = gql`
       gender
       introduction
       interests
+      photos {
+        id
+        url
+        isMain
+      }
     }
   }
 `;
