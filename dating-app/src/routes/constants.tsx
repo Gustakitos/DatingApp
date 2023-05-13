@@ -8,5 +8,6 @@ export const ROUTES = {
 }
 
 export const NESTED_ROUTES = {
-  ID: ':id'
+  ID: ':id',
+  USERNAME: ':username',
 }

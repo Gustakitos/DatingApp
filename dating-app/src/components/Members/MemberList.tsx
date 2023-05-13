@@ -15,7 +15,7 @@ export default function MemberList() {
 
     setShowLoading(loading);
     if (data) {
-      setMembers(data?.members);
+      setMembers(data.members);
     }
   }, [query]);
 
@@ -25,15 +25,18 @@ export default function MemberList() {
 
   const renderUserCard = () => {
     return members?.map((member, i) => {
-      return <MemberCard key={i} member={member} />;
+      return (
+        <div key={i} className="col-2">
+          <MemberCard member={member} />
+        </div>
+      );
     });
   };
-
   if (showLoading) return <p>Loading...</p>;
 
   return (
-    <div className="row">
-      <div className="text-center">{renderUserCard()}</div>
+    <div className="row" style={{ padding: 25 }}>
+      {renderUserCard()}
     </div>
   );
 }

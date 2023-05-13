@@ -1,5 +1,6 @@
 import React from "react";
 import "bootswatch/dist/united/bootstrap.min.css";
+import "font-awesome/css/font-awesome.min.css";
 import Main from "./routes/main";
 
 function App() {

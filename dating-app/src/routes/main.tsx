@@ -18,7 +18,7 @@ export default function Main() {
   const protectedRoutes: RouteDetails[] = [
     { path: ROUTES.MEMBERLIST, component: <MemberList /> },
     {
-      path: `${ROUTES.MEMBERDETAIL}${NESTED_ROUTES.ID}`,
+      path: `${ROUTES.MEMBERDETAIL}${NESTED_ROUTES.USERNAME}`,
       component: <MemberDetail />,
     },
     { path: ROUTES.LISTS, component: <Lists /> },
