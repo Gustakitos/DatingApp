@@ -1,58 +1,38 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Member } from "../../models/Member";
-import { GET_MEMBER } from "./gql/MemberQueries";
-import { useQuery } from "@apollo/client";
 import { Tab, Tabs } from "react-bootstrap";
 import PhotoGallery from "./components/PhotoGallery/PhotoGallery";
-
-interface GetMemberData {
-  member: Member;
-}
-
-interface GetMemberVariables {
-  username: string | undefined;
-}
+import { useGetMember } from "./hooks";
 
 export default function MemberDetail() {
   const { username } = useParams();
 
   const [member, setMember] = useState<Member>();
-  const query = useQuery<GetMemberData, GetMemberVariables>(GET_MEMBER, {
-    variables: { username },
-  });
-  const [showLoading, setShowLoading] = useState(true);
+  const { getMember: getMemberHook } = useGetMember(username);
 
-  const getMember = useCallback(() => {
-    const { data, loading } = query;
-
-    setShowLoading(loading);
-    if (data) {
-      console.log("data: ", data);
-      setMember(data.member);
-    }
-  }, [query]);
+  const memberHookFetch = useCallback(async () => {
+    const memberHook = await getMemberHook();
+    setMember(memberHook);
+    console.log("hook: ", memberHook);
+  }, [getMemberHook]);
 
   useEffect(() => {
-    getMember();
-  }, [getMember]);
+    memberHookFetch();
+  }, [memberHookFetch]);
 
   if (!username) {
     return <div>Member not found....</div>;
   }
 
-  if (showLoading) return <div>Loading....</div>;
-
   const renderTabs = (member: Member) => {
-
-
     return (
       <Tabs defaultActiveKey="about" className="mb-3">
         <Tab eventKey="about" title={`About ${member.knownAs}`}>
           <h4>Description</h4>
           <p>{member.introduction}</p>
           <h4>Looking for</h4>
-        <p>{member.interests}</p>
+          <p>{member.interests}</p>
         </Tab>
         <Tab eventKey="profile" title="Interests">
           <h4>Interests</h4>

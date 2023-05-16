@@ -22,7 +22,7 @@ public class Query
     }
   }
   public async Task<AppUser> GetUserByIdAsync([Service] IUserRepository repo, int id) => await repo.GetUserByIdAsync(id);
-  public async Task<MemberDto> GetMemberAsync([Service] IUserRepository repo, string username) => await repo.GetMemberAsync(username);
+  public async Task<MemberDto> GetMemberAsync([Service] IUserRepository repo, string username) => await repo.GetMemberAsync(username.ToLower());
   public async Task<IEnumerable<MemberDto>> GetMembersAsync([Service] IUserRepository repo)
   {
     try
@@ -41,5 +41,5 @@ public class Query
       throw new Exception("Deu ruim");
     }
   }
-  public async Task<AppUser> GetUserByUsernameAsync([Service] IUserRepository repo, string username) => await repo.GetUserByUsernameAsync(username);
+  public async Task<AppUser> GetUserByUsernameAsync([Service] IUserRepository repo, string username) => await repo.GetUserByUsernameAsync(username.ToLower());
 }

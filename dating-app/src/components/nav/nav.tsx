@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Container, Nav, NavDropdown, Navbar } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { LOGIN } from "../gql/RegisterQueries";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 interface AuthenticateFormData {
   username: string;
@@ -12,31 +12,38 @@ interface AuthenticateFormData {
 
 interface AuthenticateUserResult {
   login: {
-    username: string;
-    token: string;
+    userDto: {
+      username: string;
+      token: string;
+      photoUrl?: string;
+    }
   };
 }
 
 interface AuthenticateUserVariables {
-  loginDto: {
-    username: string;
-    password: string;
+  input: {
+    loginDto: {
+      username: string;
+      password: string;
+    };
   };
 }
 
 export function NavBar() {
   const { register, handleSubmit } = useForm<AuthenticateFormData>();
+  const navigate = useNavigate();
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
 
   useEffect(() => {
     const auth = localStorage.getItem("AUTH_TOKEN");
+
     if (auth) {
       setLoggedIn(true);
       const userObj = JSON.parse(auth);
       const capitalizedName =
-        userObj.username.charAt(0).toUpperCase() + userObj.username.slice(1);
+        userObj.userDto.username.charAt(0).toUpperCase() + userObj.userDto.username.slice(1);
       setUsername(capitalizedName);
     }
   }, []);
@@ -50,19 +57,21 @@ export function NavBar() {
     try {
       const { data } = await authenticate({
         variables: {
-          loginDto: {
-            username: formData.username,
-            password: formData.password,
+          input: {
+            loginDto: {
+              username: formData.username,
+              password: formData.password,
+            },
           },
         },
       });
 
-      const token = data?.login.token;
+      const token = data?.login.userDto.token;
       if (token) {
         localStorage.setItem("AUTH_TOKEN", JSON.stringify(data?.login));
         const capitalizedName =
-          data?.login.username.charAt(0).toUpperCase() +
-          data?.login.username.slice(1);
+          data?.login.userDto.username.charAt(0).toUpperCase() +
+          data?.login.userDto.username.slice(1);
         setUsername(capitalizedName);
         setLoggedIn(true);
       }
@@ -77,6 +86,14 @@ export function NavBar() {
     localStorage.removeItem("AUTH_TOKEN");
     setUsername("");
   }, []);
+
+  const goToProfile = useCallback(
+    () =>
+      navigate("/member/edit", {
+        state: { username },
+      }),
+    [navigate, username]
+  );
 
   return (
     <Navbar variant="dark" bg="primary" expand="md">
@@ -126,7 +143,9 @@ export function NavBar() {
                   id="nav-dropdown-dark-example"
                   title={`Welcome ${username}`}
                 >
-                  <NavDropdown.Item href="/">Edit profile</NavDropdown.Item>
+                  <NavDropdown.Item onClick={goToProfile}>
+                    Edit profile
+                  </NavDropdown.Item>
                   <NavDropdown.Item onClick={logout} href="/">
                     Logout
                   </NavDropdown.Item>

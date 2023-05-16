@@ -8,6 +8,7 @@ import Messages from "../components/Messages/Messages";
 import { NESTED_ROUTES, ROUTES } from "./constants";
 import ProtectedRoute from "./ProtectedRoute";
 import NotFound from "../components/Errors/NotFound";
+import MemberEdit from "../components/Members/MemberEdit";
 
 interface RouteDetails {
   path: string;
@@ -18,8 +19,12 @@ export default function Main() {
   const protectedRoutes: RouteDetails[] = [
     { path: ROUTES.MEMBERLIST, component: <MemberList /> },
     {
-      path: `${ROUTES.MEMBERDETAIL}${NESTED_ROUTES.USERNAME}`,
+      path: `${ROUTES.MEMBERS}${NESTED_ROUTES.USERNAME}`,
       component: <MemberDetail />,
+    },
+    {
+      path: `${ROUTES.MEMBER}${NESTED_ROUTES.EDIT}`,
+      component: <MemberEdit />,
     },
     { path: ROUTES.LISTS, component: <Lists /> },
     { path: ROUTES.MESSAGES, component: <Messages /> },

@@ -31,7 +31,10 @@ namespace API.Extensions
         .AddMutationType<Mutation>()
         .AddProjections()
         .AddFiltering()
-        .AddSorting();
+        .AddSorting()
+        .AddType<UploadType>()
+        .AddApolloTracing()
+        .AddMutationConventions();
 
       services.AddScoped<ITokenService, TokenService>();
 

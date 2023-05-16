@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: Props) {
     return <Navigate to="/" replace />;
   }
 
-  const token = JSON.parse(auth).token;
+  const token = JSON.parse(auth).userDto.token;
   const decodedJwt = parseJwt(token);
   const isExpired = decodedJwt.exp * 1000 < Date.now();
 

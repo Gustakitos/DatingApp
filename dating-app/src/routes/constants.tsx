@@ -1,13 +1,15 @@
 export const ROUTES = {
-  HOME: '/',
-  REGISTER: '/register',
-  MEMBERLIST: '/members',
-  MEMBERDETAIL: '/members/',
-  LISTS: '/lists',
-  MESSAGES: '/messages',
-}
+  HOME: "/",
+  REGISTER: "/register",
+  MEMBERLIST: "/members",
+  MEMBERS: "/members/",
+  MEMBER: "/member/",
+  LISTS: "/lists",
+  MESSAGES: "/messages",
+};
 
 export const NESTED_ROUTES = {
-  ID: ':id',
-  USERNAME: ':username',
-}
+  ID: ":id",
+  USERNAME: ":username",
+  EDIT: "edit",
+};
