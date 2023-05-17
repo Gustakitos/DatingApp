@@ -11,7 +11,7 @@ import {
   createHttpLink,
 } from "@apollo/client";
 import { NavBar } from "./components/nav/nav";
-import { setContext } from '@apollo/client/link/context';
+import { setContext } from "@apollo/client/link/context";
 import { getHttpOptions } from "./components/utils/utils";
 
 const root = ReactDOM.createRoot(
@@ -21,10 +21,12 @@ const root = ReactDOM.createRoot(
 const authLink = setContext((_, { headers }) => {
   const options = getHttpOptions();
 
+  console.log("opt: ", options);
+
   return {
     headers: {
       ...headers,
-      authorization: options ? `Bearer ${options.token}` : '',
+      authorization: options ? `Bearer ${options}` : "",
     },
   };
 });

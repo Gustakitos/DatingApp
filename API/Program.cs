@@ -30,16 +30,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(builder =>
+  builder.AllowAnyHeader()
+  .AllowAnyMethod()
+  .WithOrigins("http://localhost:4200", "http://localhost:3000"));
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapGraphQL("/graphql");
-
-app.UseCors(builder =>
-  builder.AllowAnyHeader()
-  .AllowAnyMethod()
-  .WithOrigins("http://localhost:4200", "http://localhost:3000"));
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;

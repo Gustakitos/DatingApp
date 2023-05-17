@@ -88,19 +88,27 @@ namespace API.Data.Mutations
       MemberUpdateDto dto
     )
     {
-      ClaimsPrincipal claimUser = httpContextAccessor.HttpContext.User;
+      try
+      {
+        ClaimsPrincipal claimUser = httpContextAccessor.HttpContext.User;
 
-      var userName = claimUser.GetUsername();
+        var userName = claimUser.GetUsername();
 
-      var user = await repo.GetUserByUsernameAsync(userName);
+        var user = await repo.GetUserByUsernameAsync(userName);
 
-      if (user == null) return false;
+        if (user == null) return false;
 
-      mapper.Map(dto, user);
+        mapper.Map(dto, user);
 
-      if (await repo.SaveAllAsync()) return true;
+        if (await repo.SaveAllAsync()) return true;
 
-      return false;
+        return false;
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Erro: {ex}");
+        throw new Exception(ex.Message, ex.InnerException);
+      }
     }
 
     public async Task<PhotoDto> UploadUserImage(

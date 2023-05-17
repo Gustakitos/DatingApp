@@ -15,6 +15,7 @@ export const GET_MEMBERS_QUERY = gql`
       gender
       introduction
       interests
+      lookingFor
     }
   }
 `;
@@ -34,6 +35,7 @@ export const GET_MEMBER = gql`
       gender
       introduction
       interests
+      lookingFor
       photos {
         id
         url

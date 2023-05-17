@@ -8,5 +8,5 @@ export function getHttpOptions(): HttpOptions | undefined {
   if (!userFromStorage) return;
   const userObj = JSON.parse(userFromStorage);
 
-  return userObj.token;
+  return userObj.userDto.token;
 }

@@ -4,12 +4,35 @@ import { useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { useGetMember } from "./hooks";
 import { useForm } from "react-hook-form";
+import { useMutation } from "@apollo/client";
+import { UPDATE_USER_MUTATION } from "./gql/MemberMutations";
+import PhotoEditor from "./components/PhotoEditor/PhotoEditor";
 
-interface EditFormData {
+interface UpdateUserResult {
+  updateUser: {
+    boolean: boolean;
+    __typename: string;
+  };
+}
+
+interface UpdateUserVariables {
+  input: {
+    dto: {
+      city: string;
+      country: string;
+      interests: string;
+      introduction: string;
+      lookingFor: string;
+    };
+  };
+}
+
+interface FormValues {
   city: string;
   country: string;
-  description: string;
+  interests: string;
   lookingFor: string;
+  introduction: string;
 }
 
 export default function MemberEdit() {
@@ -20,16 +43,19 @@ export default function MemberEdit() {
     register,
     handleSubmit,
     formState: { isDirty },
-  } = useForm<EditFormData>();
+    reset
+  } = useForm<FormValues>();
 
   const [member, setMember] = useState<Member>();
 
   const { getMember } = useGetMember(username);
 
+  const [updateUser] = useMutation<UpdateUserResult, UpdateUserVariables>(
+    UPDATE_USER_MUTATION
+  );
+
   const memberHookFetch = useCallback(async () => {
     const memberHook = await getMember();
-    setMember(memberHook);
-    console.log("hook: ", memberHook);
     setMember(memberHook);
   }, [getMember]);
 
@@ -37,9 +63,35 @@ export default function MemberEdit() {
     memberHookFetch();
   }, [memberHookFetch]);
 
-  const onSubmit = useCallback((formValues: any) => {
-    console.log("values: ", formValues);
-  }, []);
+  const onSubmit = useCallback(
+    async (formValues: FormValues) => {
+      console.log("values: ", formValues);
+
+      const { city, country, interests, lookingFor, introduction } = formValues;
+
+      try {
+        const { data } = await updateUser({
+          variables: {
+            input: {
+              dto: {
+                city,
+                country,
+                interests,
+                lookingFor,
+                introduction,
+              },
+            },
+          },
+        });
+
+        console.log("data: ", data);
+        reset(formValues);
+      } catch (err) {
+        console.log("error update: ", err);
+      }
+    },
+    [reset, updateUser]
+  );
 
   if (!username) return <div></div>;
 
@@ -53,14 +105,21 @@ export default function MemberEdit() {
               className="form-control"
               rows={6}
               defaultValue={member.introduction}
-              {...register("description", {})}
+              {...register("introduction", {})}
+            ></textarea>
+            <h4 className="mt-2">Looking For</h4>
+            <textarea
+              className="form-control"
+              rows={6}
+              defaultValue={member.lookingFor}
+              {...register("lookingFor", {})}
             ></textarea>
             <h4 className="mt-2">Interests</h4>
             <textarea
               className="form-control"
               rows={6}
               defaultValue={member.interests}
-              {...register("lookingFor", {})}
+              {...register("interests", {})}
             ></textarea>
             <div className="d-flex flew-row align-items-center mt-4">
               <label>City: </label>
@@ -81,7 +140,7 @@ export default function MemberEdit() {
           </form>
         </Tab>
         <Tab eventKey="photos" title="Edit Photos">
-          <p>Edit photos here</p>
+          <PhotoEditor photos={member.photos} />
         </Tab>
       </Tabs>
     );

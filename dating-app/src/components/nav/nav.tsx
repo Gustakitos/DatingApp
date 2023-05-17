@@ -63,7 +63,7 @@ export function NavBar() {
               password: formData.password,
             },
           },
-        },
+        }
       });
 
       const token = data?.login.userDto.token;

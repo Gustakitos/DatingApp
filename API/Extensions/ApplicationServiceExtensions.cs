@@ -37,7 +37,7 @@ namespace API.Extensions
         .AddMutationConventions();
 
       services.AddScoped<ITokenService, TokenService>();
-
+      services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
       services.AddScoped<IUserRepository, UserRepository>();
 
       services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
