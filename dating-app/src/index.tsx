@@ -21,8 +21,6 @@ const root = ReactDOM.createRoot(
 const authLink = setContext((_, { headers }) => {
   const options = getHttpOptions();
 
-  console.log("opt: ", options);
-
   return {
     headers: {
       ...headers,

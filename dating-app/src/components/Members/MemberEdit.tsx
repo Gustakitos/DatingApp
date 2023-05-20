@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { UPDATE_USER_MUTATION } from "./gql/MemberMutations";
 import PhotoEditor from "./components/PhotoEditor/PhotoEditor";
+import { uploadImageToCloud } from "./components/utils/UploadPhotoHandler";
+import { AxiosProgressEvent } from "axios";
 
 interface UpdateUserResult {
   updateUser: {
@@ -35,6 +37,19 @@ interface FormValues {
   introduction: string;
 }
 
+interface ProgressInfo {
+  fileName: string;
+  percentage: number;
+}
+
+export interface UploadProps {
+  idx: number;
+  file: File;
+  progressInfosRef: React.MutableRefObject<any>;
+  setProgressInfos: (value: React.SetStateAction<ProgressInfo[]>) => void;
+  setMessage: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
 export default function MemberEdit() {
   const { state } = useLocation();
   const { username } = state;
@@ -43,7 +58,7 @@ export default function MemberEdit() {
     register,
     handleSubmit,
     formState: { isDirty },
-    reset
+    reset,
   } = useForm<FormValues>();
 
   const [member, setMember] = useState<Member>();
@@ -58,6 +73,57 @@ export default function MemberEdit() {
     const memberHook = await getMember();
     setMember(memberHook);
   }, [getMember]);
+
+  const uploadHandler = useCallback(
+    async ({
+      idx,
+      file,
+      progressInfosRef,
+      setMessage,
+      setProgressInfos,
+    }: UploadProps) => {
+      let _progressInfos = [...progressInfosRef.current];
+
+      try {
+        const response = await uploadImageToCloud(
+          file,
+          (event: AxiosProgressEvent) => {
+            if (event.total) {
+              _progressInfos[idx].percentage = Math.round(
+                (100 * event.loaded) / event.total
+              );
+              setProgressInfos(_progressInfos);
+            }
+          }
+        );
+        setMessage((prevMessage) => [
+          ...prevMessage,
+          file.name + ": Successful!",
+        ]);
+        console.log("response ,", response);
+
+        setMember(member => {
+          if (member) {
+            return {
+              ...member,
+              photos: [...member.photos,(response?.data)]
+            }
+          }
+        });
+      } catch (err: any) {
+        _progressInfos[idx].percentage = 0;
+        setProgressInfos(_progressInfos);
+
+        let msg = file.name + ": Failed!";
+        if (err.response && err.response.data && err.response.data.message) {
+          msg += " " + err.response.data.message;
+        }
+
+        setMessage((prevMessage_1) => [...prevMessage_1, msg]);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     memberHookFetch();
@@ -140,7 +206,9 @@ export default function MemberEdit() {
           </form>
         </Tab>
         <Tab eventKey="photos" title="Edit Photos">
-          <PhotoEditor photos={member.photos} />
+          <div className="row">
+            <PhotoEditor photos={member.photos} uploadHandler={uploadHandler} />
+          </div>
         </Tab>
       </Tabs>
     );

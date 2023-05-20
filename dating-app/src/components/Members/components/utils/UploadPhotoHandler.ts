@@ -1,21 +1,34 @@
+import axios, { AxiosProgressEvent } from "axios";
 import { getHttpOptions } from "../../../utils/utils";
 
-export async function uploadImageToCloud() {
+export async function uploadImageToCloud(
+  file: File,
+  progressCallback: (event: AxiosProgressEvent) => void
+) {
   const token = getHttpOptions();
 
+  const formData = new FormData();
+
+  formData.append("file", file);
+
   try {
-    const response = await fetch('http://localhost:5251/api/users/add-photo', {
-      method: 'POST',
+    const request = axios.create({
+      baseURL: "http://localhost:5251/api/",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        "Content-type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log("response: ", response);
+    const post = await request.post("users/add-photo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress: progressCallback,
+    });
 
-    return response;
-  } catch(e) {
+    return post;
+  } catch (e) {
     console.log(`Error uploading: ${e}`);
   }
 }
