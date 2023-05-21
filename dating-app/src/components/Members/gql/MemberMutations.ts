@@ -8,3 +8,15 @@ export const UPDATE_USER_MUTATION = gql`
     }
   }
 `;
+
+export const SET_MAIN_PHOTO = gql`
+  mutation setMainPhoto($input: SetMainPhotoInput!) {
+    setMainPhoto(input: $input) {
+      userUpdateResult {
+        success
+        message
+      }
+      __typename
+    }
+  }
+`;

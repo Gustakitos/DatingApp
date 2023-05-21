@@ -11,6 +11,7 @@ using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Data.Mutations
 {
@@ -72,7 +73,8 @@ namespace API.Data.Mutations
         return new UserDto
         {
           Username = user.UserName,
-          Token = _tokenService.CreateToken(user)
+          Token = _tokenService.CreateToken(user),
+          PhotoUrl = user.Photos.FirstOrDefault(p => p.IsMain)?.Url
         };
       }
       catch (Exception ex)
@@ -110,55 +112,30 @@ namespace API.Data.Mutations
         throw new Exception(ex.Message, ex.InnerException);
       }
     }
-
-    public async Task<PhotoDto> UploadUserImage(
-      [Service] IUserRepository repo,
-      [Service] IHttpContextAccessor httpContextAccessor,
-      [Service] IPhotoService photoService,
-      IFile file
-    )
+    [Authorize]
+    public async Task<UserUpdateResult> SetMainPhoto([Service] IUserRepository repo,
+      [Service] IHttpContextAccessor httpContextAccessor, int photoId)
     {
-      Console.WriteLine("something? ");
-      try
-      {
-        ClaimsPrincipal claimUser = httpContextAccessor.HttpContext.User;
+      ClaimsPrincipal claimUser = httpContextAccessor.HttpContext.User;
 
-        var userName = claimUser.GetUsername();
+      var user = await repo.GetUserByUsernameAsync(claimUser.GetUsername());
 
-        var user = await repo.GetUserByUsernameAsync(userName);
+      if (user == null) return new UserUpdateResult { Success = false, Message = "User not found" };
 
-        if (user == null) throw new Exception("Problem adding photo");
+      var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
-        var result = await photoService.AddPhotoMutationAsync(file);
+      if (photo == null) return new UserUpdateResult { Success = false, Message = "Photo not found" };
 
-        if (result.Error != null) throw new Exception("Problem adding photo");
+      if (photo.IsMain) return new UserUpdateResult { Success = false, Message = "this is already your main photo" };
 
-        var photo = new Photo
-        {
-          Url = result.SecureUrl.AbsoluteUri,
-          PublicId = result.PublicId,
-        };
+      var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
+      if (currentMain != null) currentMain.IsMain = false;
 
-        if (user.Photos.Count == 0) photo.IsMain = true;
+      photo.IsMain = true;
 
-        user.Photos.Add(photo);
+      if (await repo.SaveAllAsync()) return new UserUpdateResult { Success = true };
 
-        if (await repo.SaveAllAsync())
-        {
-          return new PhotoDto
-          {
-            Id = photo.Id,
-            Url = result.SecureUrl.AbsoluteUri,
-            IsMain = photo.IsMain
-          };
-        }
-
-        throw new Exception("Problem adding photo");
-      }
-      catch (Exception ex)
-      {
-        throw new Exception($"Problem adding photo, {ex}");
-      }
+      return new UserUpdateResult { Success = false, Message = "Problem setting the main photo" };
     }
   }
 }

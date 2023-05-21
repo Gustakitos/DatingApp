@@ -13,6 +13,7 @@ import {
 import { NavBar } from "./components/nav/nav";
 import { setContext } from "@apollo/client/link/context";
 import { getHttpOptions } from "./components/utils/utils";
+import { UserProvider } from "./UserContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -42,12 +43,14 @@ const client = new ApolloClient({
 root.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <BrowserRouter>
-        <>
-          <NavBar />
-          <App />
-        </>
-      </BrowserRouter>
+      <UserProvider>
+        <BrowserRouter>
+          <>
+            <NavBar />
+            <App />
+          </>
+        </BrowserRouter>
+      </UserProvider>
     </ApolloProvider>
   </React.StrictMode>
 );

@@ -1,9 +1,17 @@
 import { useMutation } from "@apollo/client";
-import { useCallback, useEffect, useState } from "react";
-import { Container, Nav, NavDropdown, Navbar } from "react-bootstrap";
+import { useCallback, useContext, useEffect, useState } from "react";
+import {
+  Col,
+  Container,
+  Image,
+  Nav,
+  NavDropdown,
+  Navbar,
+} from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { LOGIN } from "../gql/RegisterQueries";
 import { NavLink, useNavigate } from "react-router-dom";
+import { UserContext } from "../../UserContext";
 
 interface AuthenticateFormData {
   username: string;
@@ -16,7 +24,7 @@ interface AuthenticateUserResult {
       username: string;
       token: string;
       photoUrl?: string;
-    }
+    };
   };
 }
 
@@ -33,6 +41,8 @@ export function NavBar() {
   const { register, handleSubmit } = useForm<AuthenticateFormData>();
   const navigate = useNavigate();
 
+  const { photoUrl, setPhotoUrl } = useContext(UserContext);
+
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
 
@@ -43,10 +53,12 @@ export function NavBar() {
       setLoggedIn(true);
       const userObj = JSON.parse(auth);
       const capitalizedName =
-        userObj.userDto.username.charAt(0).toUpperCase() + userObj.userDto.username.slice(1);
+        userObj.userDto.username.charAt(0).toUpperCase() +
+        userObj.userDto.username.slice(1);
       setUsername(capitalizedName);
+      setPhotoUrl(userObj.userDto.photoUrl);
     }
-  }, []);
+  }, [setPhotoUrl]);
 
   const [authenticate, { loading }] = useMutation<
     AuthenticateUserResult,
@@ -63,10 +75,12 @@ export function NavBar() {
               password: formData.password,
             },
           },
-        }
+        },
       });
 
       const token = data?.login.userDto.token;
+      const photoUrl = data?.login.userDto.photoUrl;
+
       if (token) {
         localStorage.setItem("AUTH_TOKEN", JSON.stringify(data?.login));
         const capitalizedName =
@@ -74,6 +88,10 @@ export function NavBar() {
           data?.login.userDto.username.slice(1);
         setUsername(capitalizedName);
         setLoggedIn(true);
+      }
+
+      if (photoUrl) {
+        setPhotoUrl(photoUrl);
       }
 
       console.log("User authenticated successfully: ", data);
@@ -139,6 +157,11 @@ export function NavBar() {
               }}
             >
               <Nav>
+                {photoUrl ? (
+                  <Col xs={6} md={4}>
+                    <Image src={photoUrl} thumbnail style={{ margin: 0, width: 50, height: 50, display: "inline" }} />
+                  </Col>
+                ) : null}
                 <NavDropdown
                   id="nav-dropdown-dark-example"
                   title={`Welcome ${username}`}

@@ -1,14 +1,17 @@
 import { Tab, Tabs } from "react-bootstrap";
 import { Member } from "../../models/Member";
 import { useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import { useGetMember } from "./hooks";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { useGetMember, useUpdateMainPhoto } from "./hooks";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { UPDATE_USER_MUTATION } from "./gql/MemberMutations";
 import PhotoEditor from "./components/PhotoEditor/PhotoEditor";
 import { uploadImageToCloud } from "./components/utils/UploadPhotoHandler";
 import { AxiosProgressEvent } from "axios";
+import { getAuthUser, updateUser as updateLocalUser } from "../utils/utils";
+import { Photo } from "../../models/Photo";
+import { UserContext } from "../../UserContext";
 
 interface UpdateUserResult {
   updateUser: {
@@ -50,9 +53,17 @@ export interface UploadProps {
   setMessage: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
+type LocState = {
+  username: string;
+  setNavPhoto: React.Dispatch<React.SetStateAction<string>>;
+};
+
 export default function MemberEdit() {
-  const { state } = useLocation();
-  const { username } = state;
+  const location = useLocation();
+
+  const { username } = location.state as LocState;
+
+  const { setPhotoUrl } = useContext(UserContext);
 
   const {
     register,
@@ -64,6 +75,8 @@ export default function MemberEdit() {
   const [member, setMember] = useState<Member>();
 
   const { getMember } = useGetMember(username);
+
+  const { updateMainPhoto } = useUpdateMainPhoto();
 
   const [updateUser] = useMutation<UpdateUserResult, UpdateUserVariables>(
     UPDATE_USER_MUTATION
@@ -102,12 +115,12 @@ export default function MemberEdit() {
         ]);
         console.log("response ,", response);
 
-        setMember(member => {
+        setMember((member) => {
           if (member) {
             return {
               ...member,
-              photos: [...member.photos,(response?.data)]
-            }
+              photos: [...member.photos, response?.data],
+            };
           }
         });
       } catch (err: any) {
@@ -123,6 +136,53 @@ export default function MemberEdit() {
       }
     },
     []
+  );
+
+  const setMainPhoto = useCallback(
+    async (photo: Photo) => {
+      const result = await updateMainPhoto(photo.id);
+
+      console.log("result: ", result);
+
+      const successProp = result as {
+        setMainPhoto: {
+          userUpdateResult: {
+            success?: string;
+            message?: string;
+          };
+        };
+      };
+
+      if (successProp) {
+        const user = getAuthUser()!;
+
+        user.userDto.photoUrl = photo.url;
+
+        updateLocalUser(user);
+
+        const { photos } = member!;
+
+        const newPhotos = photos.map((p) => {
+          if (p.isMain) return { ...p, isMain: false };
+          if (p.id === photo.id) return { ...p, isMain: true };
+
+          return p;
+        });
+
+        setMember((member) => {
+          if (member) {
+            return {
+              ...member,
+              photoUrl: photo.url,
+              photos: [...newPhotos!],
+            };
+          }
+        });
+
+        setPhotoUrl(photo.url)
+      }
+    },
+    [member, setPhotoUrl, updateMainPhoto]
   );
 
   useEffect(() => {
@@ -207,7 +267,11 @@ export default function MemberEdit() {
         </Tab>
         <Tab eventKey="photos" title="Edit Photos">
           <div className="row">
-            <PhotoEditor photos={member.photos} uploadHandler={uploadHandler} />
+            <PhotoEditor
+              photos={member.photos}
+              uploadHandler={uploadHandler}
+              setMainPhoto={setMainPhoto}
+            />
           </div>
         </Tab>
       </Tabs>
