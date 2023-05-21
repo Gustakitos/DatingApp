@@ -20,3 +20,15 @@ export const SET_MAIN_PHOTO = gql`
     }
   }
 `;
+
+export const DELETE_PHOTO = gql`
+  mutation deletePhoto($input: DeletePhotoInput!) {
+    deletePhoto(input: $input) {
+      userUpdateResult {
+        success
+        message
+        __typename
+      }
+    }
+  }
+`;

@@ -137,5 +137,32 @@ namespace API.Data.Mutations
 
       return new UserUpdateResult { Success = false, Message = "Problem setting the main photo" };
     }
+    [Authorize]
+    public async Task<UserUpdateResult> DeletePhoto([Service] IUserRepository repo,
+      [Service] IHttpContextAccessor httpContextAccessor, [Service] IPhotoService photoService, int photoId)
+    {
+      ClaimsPrincipal claimUser = httpContextAccessor.HttpContext.User;
+
+      var user = await repo.GetUserByUsernameAsync(claimUser.GetUsername());
+      if (user == null) return new UserUpdateResult { Success = false, Message = "Not found" };
+
+      var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+
+      if (photo == null) return new UserUpdateResult { Success = false, Message = "Not found" };
+
+      if (photo.IsMain) return new UserUpdateResult { Success = false, Message = "You cannot delete your main photo" };
+
+      if (photo.PublicId != null)
+      {
+        var result = await photoService.DeletePhotoAsync(photo.PublicId);
+        if (result.Error != null) return new UserUpdateResult { Success = false, Message = result.Error.Message };
+      }
+
+      user.Photos.Remove(photo);
+
+      if (await repo.SaveAllAsync()) return new UserUpdateResult { Success = true };
+
+      return new UserUpdateResult { Success = false, Message = "Problem deleting photo" };
+    }
   }
 }

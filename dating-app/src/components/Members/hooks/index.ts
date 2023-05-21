@@ -3,7 +3,7 @@ import { GET_MEMBER } from "../gql/MemberQueries";
 import { Member } from "../../../models/Member";
 import { useCallback } from "react";
 import useBffApolloClient from "../../../apollo/useApolloClient";
-import { SET_MAIN_PHOTO } from "../gql/MemberMutations";
+import { DELETE_PHOTO, SET_MAIN_PHOTO } from "../gql/MemberMutations";
 
 interface GetMemberData {
   member: Member;
@@ -47,4 +47,25 @@ export const useUpdateMainPhoto = () => {
   }, [client]);
 
   return { updateMainPhoto }
+}
+
+export const useDeletePhoto = () => {
+  const client = useBffApolloClient();
+
+  const deletePhoto = useCallback(async (photoId: number) => {
+    console.log("id: ", photoId);
+
+    const { data } = await client.mutate({
+      mutation: DELETE_PHOTO,
+      variables: {
+        input: {
+          photoId
+        }
+      }
+    });
+
+    return data;
+  }, [client]);
+
+  return { deletePhoto }
 }

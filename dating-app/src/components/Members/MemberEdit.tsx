@@ -2,7 +2,7 @@ import { Tab, Tabs } from "react-bootstrap";
 import { Member } from "../../models/Member";
 import { useLocation } from "react-router-dom";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { useGetMember, useUpdateMainPhoto } from "./hooks";
+import { useDeletePhoto, useGetMember, useUpdateMainPhoto } from "./hooks";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { UPDATE_USER_MUTATION } from "./gql/MemberMutations";
@@ -63,7 +63,7 @@ export default function MemberEdit() {
 
   const { username } = location.state as LocState;
 
-  const { setPhotoUrl } = useContext(UserContext);
+  const { setPhotoUrl, memberList, setMemberList } = useContext(UserContext);
 
   const {
     register,
@@ -77,6 +77,7 @@ export default function MemberEdit() {
   const { getMember } = useGetMember(username);
 
   const { updateMainPhoto } = useUpdateMainPhoto();
+  const { deletePhoto } = useDeletePhoto();
 
   const [updateUser] = useMutation<UpdateUserResult, UpdateUserVariables>(
     UPDATE_USER_MUTATION
@@ -169,20 +170,61 @@ export default function MemberEdit() {
           return p;
         });
 
+        const memberChange = memberList.map((m) => {
+          if (m.id === member?.id) {
+            return { ...m, photoUrl: photo.url };
+          }
+
+          return m;
+        });
+
+        setMemberList([...memberChange]);
+
         setMember((member) => {
           if (member) {
             return {
               ...member,
               photoUrl: photo.url,
-              photos: [...newPhotos!],
+              photos: [...newPhotos],
             };
           }
         });
 
-        setPhotoUrl(photo.url)
+        setPhotoUrl(photo.url);
       }
     },
-    [member, setPhotoUrl, updateMainPhoto]
+    [member, memberList, setMemberList, setPhotoUrl, updateMainPhoto]
+  );
+
+  const deletePhotoHandler = useCallback(
+    async (photo: Photo) => {
+      const result = await deletePhoto(photo.id);
+
+      const successProp = result as {
+        setMainPhoto: {
+          userUpdateResult: {
+            success?: string;
+            message?: string;
+          };
+        };
+      };
+
+      if (successProp) {
+        const { photos } = member!;
+
+        const newPhotos = photos.filter((p) => p.id !== photo.id);
+
+        setMember((member) => {
+          if (member) {
+            return {
+              ...member,
+              photos: [...newPhotos],
+            };
+          }
+        });
+      }
+    },
+    [deletePhoto, member]
   );
 
   useEffect(() => {
@@ -271,6 +313,7 @@ export default function MemberEdit() {
               photos={member.photos}
               uploadHandler={uploadHandler}
               setMainPhoto={setMainPhoto}
+              deletePhotoHandler={deletePhotoHandler}
             />
           </div>
         </Tab>

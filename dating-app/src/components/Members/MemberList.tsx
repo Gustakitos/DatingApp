@@ -1,30 +1,32 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { GET_MEMBERS_QUERY } from "./gql/MemberQueries";
 import { Member } from "../../models/Member";
 import { useQuery } from "@apollo/client";
 import MemberCard from "./MemberCard";
+import { UserContext } from "../../UserContext";
 
 export default function MemberList() {
   const query = useQuery<{ members: Member[] }>(GET_MEMBERS_QUERY);
 
-  const [members, setMembers] = useState<Member[]>();
   const [showLoading, setShowLoading] = useState(true);
+
+  const { memberList, setMemberList } = useContext(UserContext);
 
   const getMembers = useCallback(() => {
     const { data, loading } = query;
 
     setShowLoading(loading);
     if (data) {
-      setMembers(data.members);
+      setMemberList(data.members);
     }
-  }, [query]);
+  }, [query, setMemberList]);
 
   useEffect(() => {
     getMembers();
   }, [getMembers]);
 
   const renderUserCard = () => {
-    return members?.map((member, i) => {
+    return memberList?.map((member, i) => {
       return (
         <div key={i} className="col-2">
           <MemberCard member={member} />

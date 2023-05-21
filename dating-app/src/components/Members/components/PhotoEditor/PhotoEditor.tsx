@@ -5,6 +5,7 @@ import PhotoUploader from "../PhotoUploader/PhotoUploader";
 interface Props {
   photos: Photo[];
   setMainPhoto: (photo: Photo) => Promise<void>;
+  deletePhotoHandler: (photo: Photo) => Promise<void>;
   uploadHandler: ({
     idx,
     file,
@@ -18,6 +19,7 @@ export default function PhotoEditor({
   photos,
   uploadHandler,
   setMainPhoto,
+  deletePhotoHandler
 }: Props) {
   return (
     <>
@@ -43,7 +45,7 @@ export default function PhotoEditor({
                 >
                   Main
                 </button>
-                <button className="btn btn-sm btn-danger">
+                <button className="btn btn-sm btn-danger" onClick={() => deletePhotoHandler(photo)}>
                   <i className="fa fa-trash"></i>
                 </button>
               </div>

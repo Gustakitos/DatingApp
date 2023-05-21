@@ -38,6 +38,20 @@ const client = new ApolloClient({
   link: authLink.concat(link),
   credentials: "include",
   cache: new InMemoryCache(),
+  defaultOptions: {
+    mutate: {
+      fetchPolicy: "no-cache",
+      errorPolicy: "ignore",
+    },
+    query: {
+      fetchPolicy: "no-cache",
+      errorPolicy: "all",
+    },
+    watchQuery: {
+      fetchPolicy: "no-cache",
+      errorPolicy: "ignore",
+    },
+  },
 });
 
 root.render(

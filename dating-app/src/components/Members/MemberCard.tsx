@@ -65,6 +65,7 @@ export default function MemberCard({ member }: Props) {
             id="cardImg"
             src={member.photoUrl || UserImage}
             alt={member.knownAs}
+            className="card-img-top"
           />
           <ul className="list-inline member-icons animate text-center">
             <li className="list-inline-item">
